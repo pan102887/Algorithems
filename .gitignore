@@ -1,0 +1,53 @@
+# 构建目录
+build/
+bin/
+lib/
+obj/
+
+# 编译产物
+*.o
+*.a
+*.so
+*.exe
+*.out
+
+# CMake相关
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+compile_commands.json
+
+# 调试和分析文件
+*.gcda
+*.gcno
+*.gcov
+coverage_report/
+*.log
+
+# IDE相关文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.temp
+/tmp/
+
+# 测试输出
+test_results/
+*.xml
+
+# 覆盖率报告
+lcov.info
+coverage.info
+
+# 静态分析报告
+cppcheck.xml
