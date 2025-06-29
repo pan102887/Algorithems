@@ -1,5 +1,8 @@
 # 算法工具包 (Algorithms Toolkit)
 
+> **🤖 AI生成声明**  
+> 本项目由人工智能辅助生成和优化。代码结构、实现逻辑、文档内容等均通过AI技术协助完成，旨在展示现代化C语言项目的最佳实践和高质量代码标准。
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C Standard](https://img.shields.io/badge/C-C11-blue.svg)](https://en.wikipedia.org/wiki/C11_(C_standard_revision))
 [![C++ Standard](https://img.shields.io/badge/C++-C++17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B17)
