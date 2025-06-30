@@ -9,7 +9,6 @@
  * ============================================================================
  */
 
-typedef int (*compare_func_t)(const void *a, const void *b);
 
 typedef enum {
   SORT_SUCCESS = 0,
@@ -26,13 +25,21 @@ typedef struct {
   double time_elapsed_ms; /**< 排序耗时(毫秒) */
 } sort_stats_t;
 
+void incre_comparisons(sort_stats_t *stats);
+void incre_movements(sort_stats_t *stats);
+
+
+typedef int (*generic_compare_func_t)(const void * const a, const void * const b);
+typedef int (*int_compare_func_t)(const int a, const int b);
+typedef int (*string_compare_func_t)(const char * const a, const char * const b);
+
 /**
  * ===========================================================================
  * Commonly Compare Function
  * ===========================================================================
  */
 
-int compare_integers(const void *a, const void *b);
-int compare_strings(const void *a, const void *b);
+int compare_integers(const void * const a, const void * const b);
+int compare_strings(const void * const a, const void * const b);
 
 #endif

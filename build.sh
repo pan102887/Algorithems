@@ -179,7 +179,7 @@ build_project() {
     cd build
     
     # 获取CPU核心数用于并行编译
-    local cores=$(nproc 2>/dev/null || echo 4)
+    local cores=$(nproc || echo 4)
     print_message $BLUE "使用 $cores 个并行任务编译"
     
     make -j$cores
