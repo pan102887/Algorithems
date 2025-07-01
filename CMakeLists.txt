@@ -201,41 +201,6 @@ if(TEST_SOURCES)
     endforeach()
 endif()
 
-# ============================================================================
-# 示例和基准测试
-# ============================================================================
-
-# 示例程序
-file(GLOB EXAMPLE_SOURCES examples/*.c examples/*.cpp)
-foreach(EXAMPLE_FILE ${EXAMPLE_SOURCES})
-    get_filename_component(EXAMPLE_NAME ${EXAMPLE_FILE} NAME_WE)
-    add_executable(example_${EXAMPLE_NAME} ${EXAMPLE_FILE})
-    target_link_libraries(example_${EXAMPLE_NAME} algorithms_toolkit)
-endforeach()
-
-# 基准测试程序
-file(GLOB BENCHMARK_SOURCES benchmarks/*.c benchmarks/*.cpp)
-foreach(BENCHMARK_FILE ${BENCHMARK_SOURCES})
-    get_filename_component(BENCHMARK_NAME ${BENCHMARK_FILE} NAME_WE)
-    add_executable(benchmark_${BENCHMARK_NAME} ${BENCHMARK_FILE})
-    target_link_libraries(benchmark_${BENCHMARK_NAME} algorithms_toolkit)
-endforeach()
-
-# API清洁度测试程序
-add_executable(test_api_cleanup examples/test_api_cleanup.c)
-target_link_libraries(test_api_cleanup 
-    algorithms_toolkit 
-    algorithms_sorting
-)
-target_include_directories(test_api_cleanup PRIVATE include)
-
-# 统计开关测试程序
-add_executable(test_stats_control examples/test_stats_control.c)
-target_link_libraries(test_stats_control 
-    algorithms_toolkit 
-    algorithms_sorting
-)
-target_include_directories(test_stats_control PRIVATE include)
 
 # ============================================================================
 # 代码覆盖率（Debug模式）
