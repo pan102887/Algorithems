@@ -173,7 +173,7 @@ if(TEST_SOURCES)
     add_test(NAME algorithms_unit_tests COMMAND algorithms_tests)
     
     # 为每个模块创建独立的测试（如果需要）
-    foreach(MODULE sorting searching data_structures graph dynamic_programming)
+    foreach(MODULE IN LISTS MODULE_LIST)
         file(GLOB MODULE_TEST_SOURCES tests/${MODULE}/*.cpp)
         if(MODULE_TEST_SOURCES)
             add_executable(algorithms_${MODULE}_tests ${MODULE_TEST_SOURCES})

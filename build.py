@@ -15,6 +15,15 @@ import multiprocessing
 project_name: str = "Algorithems"
 project_root: Path = Path.cwd()
 
+valid_generators = ["Unix Makefiles",
+                    "Ninja", "Xcode", "Visual Studio 16 2019"]
+
+c_compilers: list[str] = ["gcc", "clang", "icc", "icx"]
+cxx_compilers: list[str] = ["g++", "clang++", "icpc", "icpx"]
+
+c_standards: list[str] = ["89", "90", "ANSI", "iSO", "11", "17", "23"]
+cxx_standards: list[str] = ["11", "14", "17", "20", "23"]
+
 
 class DependencyElement:
     def __init__(self, name: str,
@@ -37,7 +46,7 @@ class DependencyElement:
     def __print_install_help(self):
         if self.install_cmd is not None:
             printer.info(f"To install {self.name}, run: {self.install_cmd}")
-        
+
     def __print_warn_or_error_info_if_not_exists(self):
         if not self.exists:
             if self.required:
@@ -51,14 +60,12 @@ class DependencyElement:
             self.candidats = set()
         self.candidats.add(candidate)
         candidate.or_(self)
-        
-        
 
     def check(self):
         if shutil.which(self.cmd) is None:
             self.__print_warn_or_error_info_if_not_exists()
             return
-                
+
         try:
             result = subprocess.run(
                 [self.cmd, self.version_check_arg],
@@ -73,7 +80,7 @@ class DependencyElement:
                     self.version_info = lines[0].strip()
                     self.exists = True
                     return
-                
+
                 lines = (result.stderr or '').splitlines()
                 if len(lines) > 0:
                     self.version_info = lines[0].strip()
@@ -83,8 +90,6 @@ class DependencyElement:
                 self.__print_warn_or_error_info_if_not_exists()
         except FileNotFoundError as e:
             self.__print_warn_or_error_info_if_not_exists()
-
-            
 
 
 class Printer:
@@ -175,6 +180,12 @@ class BuildTool:
         self.printer = printer if printer else Printer()
         self.project_root = Path.cwd()
         self.build_dir = self.project_root / "build"
+        self.cpp_compiler: str = "g++"
+        self.c_compiler: str = "gcc"
+        self.build_type: str = "Release"
+        self.c_standar: str = "11"
+        self.cxx_standar: str = "17"
+        self.generator: str = "Unix Makefiles"
 
     def __mv_deps_to_tmp(self, deps_dir: Optional[Path] = None) -> Optional[Path]:
         deps_cache = None
@@ -200,6 +211,12 @@ class BuildTool:
                 shutil.move(file_path, deps_dir / fileName)
             # shutil.move(deps_cache, deps_dir)
 
+    def __prepaire_build_dir(self):
+        if not self.build_dir.exists():
+            self.build_dir.mkdir(parents=True, exist_ok=True)
+            self.printer.success(
+                f"Build directory {self.build_dir} created successfully.")
+
     def clean(self):
         cache_dir: Optional[Path] = None
         if self.build_dir.exists():
@@ -219,18 +236,59 @@ class BuildTool:
             printer.success(
                 f"Build directory {self.build_dir} cleaned successfully.")
 
-    def prepaire_build_dir(self):
-        if not self.build_dir.exists():
-            self.build_dir.mkdir(parents=True, exist_ok=True)
-            self.printer.success(
-                f"Build directory {self.build_dir} created successfully.")
+    def set_c_compiler(self, compiler: str):
+        if compiler in c_compilers:
+            self.c_compiler = compiler
+        else:
+            self.printer.error(f"Unsupported C compiler: {compiler}")
+            sys.exit(1)
 
-    def prepare_cmake(self, build_type: str = "Release"):
-        self.prepaire_build_dir()
+    def set_cpp_compiler(self, compiler: str):
+        if compiler in cxx_compilers:
+            self.cpp_compiler = compiler
+        else:
+            self.printer.error(f"Unsupported C++ compiler: {compiler}")
+            sys.exit(1)
+
+    def set_build_type(self, build_type: str):
+        if build_type in ["Release", "Debug"]:
+            self.build_type = build_type
+        else:
+            self.printer.error(f"Unsupported build type: {build_type}")
+            sys.exit(1)
+
+    def set_c_standar(self, c_standar: str):
+        if c_standar in c_standards:
+            self.c_standar = c_standar
+        else:
+            self.printer.error(f"Unsupported C standard: {c_standar}")
+            sys.exit(1)
+
+    def set_cxx_standar(self, cxx_standar: str):
+        if cxx_standar in cxx_standards:
+            self.cxx_standar = cxx_standar
+        else:
+            self.printer.error(f"Unsupported C++ standard: {cxx_standar}")
+            sys.exit(1)
+
+    def set_generator(self, generator: str):
+        if generator in valid_generators:
+            self.generator = generator
+        else:
+            self.printer.error(f"Unsupported generator: {generator}")
+            sys.exit(1)
+
+    def prepare_cmake(self):
+        self.__prepaire_build_dir()
 
         cmake_command = [
             "cmake",
-            f"-DCMAKE_BUILD_TYPE={build_type}",
+            f"-G{self.generator}",
+            f"-DCMAKE_BUILD_TYPE={self.build_type}",
+            f"-DCMAKE_C_COMPILER={self.c_compiler}",
+            f"-DCMAKE_CXX_COMPILER={self.cpp_compiler}",
+            f"-DCMAKE_C_STANDARD={self.c_standar}",
+            f"-DCMAKE_CXX_STANDARD={self.cxx_standar}",
             str(self.project_root)
         ]
 
@@ -251,15 +309,20 @@ class BuildTool:
             sys.exit(result.returncode)
         else:
             self.printer.success("CMake configuration completed successfully.")
-        
+
     def build(self):
         printer.info(f"Building project {project_name}...")
 
-
         cpu_count = multiprocessing.cpu_count()
-        printer.info(f"make -j{cpu_count} (using {cpu_count} CPU cores)")
+        if self.generator == "Ninja":
+            build_command = ["ninja", f"-j{cpu_count}"]
+            self.printer.info(f"ninja -j{cpu_count} (using {cpu_count} CPU cores)")
+        else:
+            build_command = ["make", f"-j{cpu_count}"]
+            self.printer.info(f"make -j{cpu_count} (using {cpu_count} CPU cores)")
+
         result = subprocess.run(
-            ["make", f"-j{cpu_count}"],
+            build_command,
             cwd=self.build_dir,
             capture_output=False,
             text=True,
@@ -267,11 +330,9 @@ class BuildTool:
         )
         if result.returncode != 0:
             printer.error(f"Build failed with exit code {result.returncode}")
-            if result.stderr is not None: printer.error(result.stderr)
+            if result.stderr is not None:
+                printer.error(result.stderr)
             sys.exit(result.returncode)
-        
-
-
 
 # ===================================================================================
 # ***                                 BUILD SCRIPT                                ***
@@ -285,7 +346,7 @@ def depencies_check():
         "g++",
         "cmake",
     ]
-    required: list[DependencyElement] =[
+    required: list[DependencyElement] = [
         DependencyElement("gcc"),
         DependencyElement("g++"),
         DependencyElement("cmake"),
@@ -311,12 +372,14 @@ def main():
     parser.add_argument(
         "--debug", "-d", action="store_true", help="以debug模式构建")
     parser.add_argument("--test", "-t", action="store_true", help="运行所有测试")
-    parser.add_argument("--all", "-a", action="store_true",
-                        help="执行完整流程（智能清理、构建、测试、示例")
-    parser.add_argument("--c-compiler", choices=["gcc", "clang"])
-    parser.add_argument("--cpp-compiler", choices=["g++", "clang++"])
-    parser.add_argument("--c-standar", choices=["89", "90", "ANSI", "iSO", "11", "17", "23"])
+    parser.add_argument("--all", "-a", action="store_true",help="执行完整流程（智能清理、构建、测试、示例")
+    parser.add_argument("--c-compiler", choices=c_compilers, help="指定C编译器")
+    parser.add_argument("--cpp-compiler", choices=cxx_compilers, help="指定C++编译器")
+    parser.add_argument("--c-standar", choices=c_standards, help="指定C标准")
+    parser.add_argument("--cxx-standar", choices=cxx_standards, help="指定C++标准")
     parser.add_argument("--make", "-m", action="store_true", help="直接执行make")
+    parser.add_argument("--generator", "-G", choices=valid_generators, help="选择生成器")
+
 
     args = parser.parse_args()
 
@@ -333,6 +396,18 @@ def main():
         buildTool.build()
         sys.exit(0)
 
+    if args.c_compiler:
+        buildTool.set_c_compiler(args.c_compiler)
+    if args.cpp_compiler:
+        buildTool.set_cpp_compiler(args.cpp_compiler)
+    if args.c_standar:
+        buildTool.set_c_standar(args.c_standar)
+    if args.cxx_standar:
+        buildTool.set_cxx_standar(args.cxx_standar)
+
+    if args.generator:
+        buildTool.set_generator(args.generator)
+
     buildType: str = "Release"
     if args.release:
         buildType = "Release"
@@ -340,7 +415,8 @@ def main():
         buildType = "Debug"
 
     depencies_check()
-    buildTool.prepare_cmake(buildType)
+    buildTool.set_build_type(buildType)
+    buildTool.prepare_cmake()
     buildTool.build()
 
 
@@ -348,4 +424,3 @@ colorama_init()
 printer = Printer()
 if __name__ == "__main__":
     main()
-    
