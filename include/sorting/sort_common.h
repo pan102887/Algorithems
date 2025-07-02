@@ -3,6 +3,9 @@
 
 #include <stddef.h>
 #include <string.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* ============================================================================
  * 类型定义和常量
@@ -42,4 +45,8 @@ typedef int (*string_compare_func_t)(const char * const a, const char * const b)
 int compare_integers(const void * const a, const void * const b);
 int compare_strings(const void * const a, const void * const b);
 
+
+#ifdef __cplusplus
+}
+#endif
 #endif

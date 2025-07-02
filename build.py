@@ -315,6 +315,7 @@ def main():
     parser.add_argument("--c-compiler", choices=["gcc", "clang"])
     parser.add_argument("--cpp-compiler", choices=["g++", "clang++"])
     parser.add_argument("--c-standar", choices=["89", "90", "ANSI", "iSO", "11", "17", "23"])
+    parser.add_argument("--make", "-m", action="store_true", help="直接执行make")
 
     args = parser.parse_args()
 
@@ -326,6 +327,9 @@ def main():
     elif args.clean_all:
         printer.warning("clean all")
         buildTool.clean_all()
+        sys.exit(0)
+    elif args.make:
+        buildTool.build()
         sys.exit(0)
 
     buildType: str = "Release"

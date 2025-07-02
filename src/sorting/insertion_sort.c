@@ -1,3 +1,5 @@
+
+#include "sorting/sort_common.h"
 #include "sorting/insertion_sort.h"
 
 
@@ -8,19 +10,21 @@ sort_result_t generic_insertion_sort(void *arr[], size_t len, generic_compare_fu
     if (len == 0 || len == 1) {
         return SORT_SUCCESS;
     }
-    for (int i = 1; i < len; i++) {
+    for (size_t i = 1; i < len; i++) {
         void *key = arr[i];
         
         
-        int j = i - 1;
-        while (j >= 0 && cmp(arr[j], key) > 0) {
+        size_t j = i - 1;
+        incre_comparisons(stats);
+        while (j > 0 && cmp(arr[j], key) > 0) {
+            incre_comparisons(stats);
             arr[j + 1] = arr[j];
             j--;
         }
+        incre_movements(stats);
         arr[j + 1] = key;
-    
     }
-
+    return SORT_SUCCESS;
 }
 
 
@@ -34,16 +38,19 @@ sort_result_t generic_insertion_sort_with_binary_search(void *arr[], size_t len,
         return SORT_SUCCESS;
     }
 
-    for (int i = 1; i < len; i++) {
+    for (size_t i = 1; i < len; i++) {
         void *key = arr[i];
 
-        int left = 0;
-        int right = i - 1;
+        size_t left = 0;
+        size_t right = i - 1;
 
 
-        int mid;
+        size_t mid;
+        incre_comparisons(stats);
         while (left <= right) {
+
             mid = left + (right - left) / 2;
+            incre_comparisons(stats);
             if (cmp(arr[mid], key) < 0) {
                 // 如果中点的值比key小，则key应该在中点的右侧，所以将左界设置为mid + 1
                 left = mid + 1;
@@ -54,11 +61,11 @@ sort_result_t generic_insertion_sort_with_binary_search(void *arr[], size_t len,
         }
 
         
-        for (int j = i; j > left; j--) {
+        for (size_t j = i; j > left; j--) {
+            incre_movements(stats);
             arr[j] = arr[j - 1];
         }
         arr[left] = key;
     }
-
-
+    return SORT_SUCCESS;
 }

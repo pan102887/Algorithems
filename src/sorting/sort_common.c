@@ -11,15 +11,19 @@ int compare_strings(const void * const a, const void * const b) {
 }
 
 void incre_comparisons(sort_stats_t *stats) {
+  #ifdef DEBUG
   if (NULL == stats) {
     return;
   }
   stats->comparisons++;
+  #endif
 }
 
 void incre_movements(sort_stats_t *stats) {
+  #ifdef DEBUG
   if (NULL == stats) {
     return;
   }
   stats->movements++;
+  #endif
 }
