@@ -20,85 +20,71 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
 # 包含目录
 include_directories(include)
 
+
+message(STATUS "=========================================")
+message(STATUS "                 生成主库")
+message(STATUS "=========================================")
 # ============================================================================
 # 收集所有源文件
 # ============================================================================
 
-# 排序算法源文件
-file(GLOB_RECURSE SORTING_SOURCES src/sorting/*.c)
-file(GLOB_RECURSE SORTING_HEADERS include/sorting/*.h)
+set(MODULE_LIST 
+    sorting 
+    searching 
+    data_structures 
+    graph 
+    dynamic_programming
+)
 
-# 搜索算法源文件
-file(GLOB_RECURSE SEARCHING_SOURCES src/searching/*.c)
-file(GLOB_RECURSE SEARCHING_HEADERS include/searching/*.h)
-
-# 数据结构源文件
-file(GLOB_RECURSE DATA_STRUCTURES_SOURCES src/data_structures/*.c)
-file(GLOB_RECURSE DATA_STRUCTURES_HEADERS include/data_structures/*.h)
-
-# 图算法源文件
-file(GLOB_RECURSE GRAPH_SOURCES src/graph/*.c)
-file(GLOB_RECURSE GRAPH_HEADERS include/graph/*.h)
-
-# 动态规划算法源文件
-file(GLOB_RECURSE DP_SOURCES src/dynamic_programming/*.c)
-file(GLOB_RECURSE DP_HEADERS include/dynamic_programming/*.h)
+foreach(MODULE IN LISTS MODULE_LIST)
+    string(TOUPPER "${MODULE}" MODULE_UPPER)
+    
+    file(GLOB_RECURSE ${MODULE_UPPER}_SOURCES src/${MODULE}/*.c)
+    file(GLOB_RECURSE ${MODULE_UPPER}_HEADERS include/${MODULE}/*.h)
+    list(LENGTH ${MODULE_UPPER}_SOURCES SOUECE_FILE_COUNT)
+    list(LENGTH ${MODULE_UPPER}_HEADERS HEAD_FILE_COUNT)
+    set(ALL_SOURCES ${${MODULE_UPPER}_SOURCES} ${ALL_SOURCES})
+    set(ALL_HEADERS ${${MODULE_UPPER}_HEADERS} ${ALL_HEADERS})
+endforeach()
 
 # 合并所有源文件
-set(ALL_SOURCES 
-    src/algorithms.c
-    ${SORTING_SOURCES}
-    ${SEARCHING_SOURCES}
-    ${DATA_STRUCTURES_SOURCES}
-    ${GRAPH_SOURCES}
-    ${DP_SOURCES}
-)
+set(ALL_SOURCES src/algorithms.c ${ALL_SOURCES})
 
-set(ALL_HEADERS
-    ${SORTING_HEADERS}
-    ${SEARCHING_HEADERS}
-    ${DATA_STRUCTURES_HEADERS}
-    ${GRAPH_HEADERS}
-    ${DP_HEADERS}
-)
 
 # ============================================================================
 # 创建库目标
 # ============================================================================
 
 # 创建主静态库
-add_library(algorithms_toolkit STATIC ${ALL_SOURCES} ${ALL_HEADERS})
-target_include_directories(algorithms_toolkit PUBLIC include)
+if(ALL_SOURCES)
+    message("-- 构建主库 algorithms_toolkit")
+    add_library(algorithms_toolkit STATIC ${ALL_SOURCES} ${ALL_HEADERS})
+    target_include_directories(algorithms_toolkit PUBLIC include)
+    # 链接数学库和实时库（POSIX）
+    target_link_libraries(algorithms_toolkit m rt)
+endif()
+
 
 # 创建各模块的独立库
-if(SORTING_SOURCES)
-    add_library(algorithms_sorting STATIC ${SORTING_SOURCES} ${SORTING_HEADERS})
-    target_include_directories(algorithms_sorting PUBLIC include)
-endif()
+foreach(MODULE IN LISTS MODULE_LIST)
+    string(TOUPPER "${MODULE}" MODULE_UPPER)    
+    if (${MODULE_UPPER}_SOURCES OR ${MODULE_UPPER}_HEADERS)
+        message("-- 生成 ${MODULE} 模块独立库")
+        add_library(algorithms_${MODULE} STATIC ${${MODULE_UPPER}_SOURCES} ${${MODULE_UPPER}_HEADERS})
+        target_include_directories(algorithms_${MODULE} PUBLIC include)
+    endif()
+endforeach()
 
-if(SEARCHING_SOURCES)
-    add_library(algorithms_searching STATIC ${SEARCHING_SOURCES} ${SEARCHING_HEADERS})
-    target_include_directories(algorithms_searching PUBLIC include)
-endif()
 
-if(DATA_STRUCTURES_SOURCES)
-    add_library(algorithms_data_structures STATIC ${DATA_STRUCTURES_SOURCES} ${DATA_STRUCTURES_HEADERS})
-    target_include_directories(algorithms_data_structures PUBLIC include)
-endif()
+# ============================================================================
+# 生成 Test 库
+# ============================================================================
 
-if(GRAPH_SOURCES)
-    add_library(algorithms_graph STATIC ${GRAPH_SOURCES} ${GRAPH_HEADERS})
-    target_include_directories(algorithms_graph PUBLIC include)
-endif()
 
-if(DP_SOURCES)
-    add_library(algorithms_dp STATIC ${DP_SOURCES} ${DP_HEADERS})
-    target_include_directories(algorithms_dp PUBLIC include)
-endif()
-
-# 链接数学库和实时库（POSIX）
-target_link_libraries(algorithms_toolkit m rt)
-
+message("")
+message(STATUS "=========================================")
+message(STATUS "               生成测试用例")
+message(STATUS "=========================================")
 # ============================================================================
 # Google Test 配置
 # ============================================================================
