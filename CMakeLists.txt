@@ -12,9 +12,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 
 # Debug和Release配置
-set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG -fsanitize=address -fsanitize=undefined")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -fsanitize=address -fsanitize=undefined")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
 
 # 包含目录
@@ -154,6 +154,10 @@ endif()
 
 # 启用测试
 enable_testing()
+include(CTest)
+set(CTEST_PROJECT_NAME "AlgorithmsToolkit")
+set(CTEST_NIGHTLY_START_TIME "00:00:00 EST")
+set(CTEST_DROP_METHOD "http")
 
 # ============================================================================
 # 测试目标
@@ -191,6 +195,15 @@ if(TEST_SOURCES)
                 algorithms_toolkit
                 ${GTEST_LIBRARIES}
             )
+            
+            # 为模块测试添加覆盖率和sanitizer支持（Debug模式）
+            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+                if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
+                    target_compile_options(algorithms_${MODULE}_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+                    target_link_options(algorithms_${MODULE}_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+                endif()
+            endif()
+            
             if(NOT GTest_FOUND)
                 target_include_directories(algorithms_${MODULE}_tests PRIVATE
                     ${googletest_SOURCE_DIR}/googletest/include
@@ -203,17 +216,45 @@ endif()
 
 
 # ============================================================================
-# 代码覆盖率（Debug模式）
+# 代码覆盖率和Sanitizer（Debug模式）
 # ============================================================================
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-        target_compile_options(algorithms_toolkit PRIVATE --coverage)
-        target_link_options(algorithms_toolkit PRIVATE --coverage)
+        # 为主库添加覆盖率和sanitizer支持
+        target_compile_options(algorithms_toolkit PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+        target_link_options(algorithms_toolkit PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
         
+        # 为各模块库也添加覆盖率和sanitizer支持
+        if(TARGET algorithms_sorting)
+            target_compile_options(algorithms_sorting PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            target_link_options(algorithms_sorting PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+        endif()
+        
+        if(TARGET algorithms_searching)
+            target_compile_options(algorithms_searching PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            target_link_options(algorithms_searching PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+        endif()
+        
+        if(TARGET algorithms_data_structures)
+            target_compile_options(algorithms_data_structures PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            target_link_options(algorithms_data_structures PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+        endif()
+        
+        if(TARGET algorithms_graph)
+            target_compile_options(algorithms_graph PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            target_link_options(algorithms_graph PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+        endif()
+        
+        if(TARGET algorithms_dp)
+            target_compile_options(algorithms_dp PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            target_link_options(algorithms_dp PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+        endif()
+        
+        # 为测试目标添加覆盖率和sanitizer支持
         if(TARGET algorithms_tests)
-            target_compile_options(algorithms_tests PRIVATE --coverage)
-            target_link_options(algorithms_tests PRIVATE --coverage)
+            target_compile_options(algorithms_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            target_link_options(algorithms_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
         endif()
     endif()
 endif()

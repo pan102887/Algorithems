@@ -257,6 +257,7 @@ class BuildTool:
 
 
         cpu_count = multiprocessing.cpu_count()
+        printer.info(f"make -j{cpu_count} (using {cpu_count} CPU cores)")
         result = subprocess.run(
             ["make", f"-j{cpu_count}"],
             cwd=self.build_dir,
@@ -266,7 +267,7 @@ class BuildTool:
         )
         if result.returncode != 0:
             printer.error(f"Build failed with exit code {result.returncode}")
-            printer.error(result.stderr)
+            if result.stderr is not None: printer.error(result.stderr)
             sys.exit(result.returncode)
         
 

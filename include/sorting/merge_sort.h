@@ -8,10 +8,6 @@ extern "C" {
 
 
 
-sort_result_t generic_merge_sort(void *arr[], size_t len, generic_compare_func_t cmp,
-                                 sort_stats_t *stats);
-
-
                                  
 #ifdef __cplusplus
 }

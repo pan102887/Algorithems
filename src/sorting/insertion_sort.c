@@ -38,14 +38,14 @@ sort_result_t generic_insertion_sort_with_binary_search(void *arr[], size_t len,
         return SORT_SUCCESS;
     }
 
-    for (size_t i = 1; i < len; i++) {
+    for (int i = 1; i < (int)len; i++) {
         void *key = arr[i];
 
-        size_t left = 0;
-        size_t right = i - 1;
+        int left = 0;
+        int right = i - 1;
 
 
-        size_t mid;
+        int mid;
         incre_comparisons(stats);
         while (left <= right) {
 
@@ -56,12 +56,12 @@ sort_result_t generic_insertion_sort_with_binary_search(void *arr[], size_t len,
                 left = mid + 1;
             } else {
                 // 如果重点的值大于等于key, 则key的插入位置应该在中点的左侧或者中点这，因此将右边界设置为mid
-                right = mid;
+                right = mid - 1;
             }
         }
 
         
-        for (size_t j = i; j > left; j--) {
+        for (int j = i; j > left; j--) {
             incre_movements(stats);
             arr[j] = arr[j - 1];
         }
