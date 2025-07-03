@@ -39,9 +39,11 @@ void incre_movements(sort_stats_t *stats);
 #define INCRE_MOVEMENTS(stats)
 #endif
 
-typedef int (*generic_compare_func_t)(const void * const a, const void * const b);
-typedef int (*int_compare_func_t)(const int a, const int b);
-typedef int (*string_compare_func_t)(const char * const a, const char * const b);
+typedef int generic_compare_func_t(const void * const a, const void * const b);
+typedef void generic_swap_func_t(void * const a, void * const b);
+
+typedef int int_compare_func_t(const int a, const int b);
+typedef int string_compare_func_t(const char * const a, const char * const b);
 
 /**
  * ===========================================================================

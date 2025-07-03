@@ -26,4 +26,41 @@ TEST_F(SelectionSortTest, NullPointerHandling) {
     EXPECT_EQ(generic_selection_sort(arr, 10, nullptr, &stats), SORT_ERROR_NULL_POINTER);
 }
 
+TEST_F(SelectionSortTest, EmptyArrayHandling) {
+    sort_stats_t stats;
+    void** arr = reinterpret_cast<void**>(int_data.data());
+
+    EXPECT_EQ(generic_selection_sort(arr, 0, compare_integers, &stats), SORT_SUCCESS);
+}
+
+TEST_F(SelectionSortTest, SingleElementArray) {
+    sort_stats_t stats;
+    std::vector<int> single_element = {42};
+    auto data = single_element.data();
+    void **arr = new void*[single_element.size()];
+    for(size_t i = 0; i < single_element.size(); i++) {
+        arr[i] = &data[i];
+    }
+
+    EXPECT_EQ(generic_selection_sort(arr, 1, compare_integers, &stats), SORT_SUCCESS);
+    EXPECT_EQ(single_element[0], 42);
+    delete[] arr;
+}
+
+TEST_F(SelectionSortTest, SortFunctionality) {
+    sort_stats_t stats;
+    auto data = int_data.data();
+    
+    
+    
+    
+    
+    EXPECT_EQ(generic_selection_sort((void **)(data), int_data.size(), compare_integers, &stats), SORT_SUCCESS);
+    
+    for (size_t i = 0; i < int_data.size(); i++) {
+        EXPECT_EQ(data[i], expected_data[i]);
+    }
+    
+}
+
 
