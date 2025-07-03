@@ -15,9 +15,13 @@ import multiprocessing
 project_name: str = "Algorithems"
 project_root: Path = Path.cwd()
 
-valid_generators = ["Unix Makefiles",
-                    "Ninja", "Xcode", "Visual Studio 16 2019"]
+build_types: list[str] = ["debug", "release", "Debug", "Release"]
 
+make: str = "Unix Makefiles"
+ninja: str = "Ninja"
+
+valid_generators = [make,
+                    ninja, "Xcode", "Visual Studio 16 2019"]
 c_compilers: list[str] = ["gcc", "clang", "icc", "icx"]
 cxx_compilers: list[str] = ["g++", "clang++", "icpc", "icpx"]
 
@@ -183,9 +187,9 @@ class BuildTool:
         self.cpp_compiler: str = "g++"
         self.c_compiler: str = "gcc"
         self.build_type: str = "Release"
-        self.c_standar: str = "11"
-        self.cxx_standar: str = "17"
-        self.generator: str = "Unix Makefiles"
+        self.c_standar: str = "23"
+        self.cxx_standar: str = "23"
+        self.generator: str = "Ninja"
 
     def __mv_deps_to_tmp(self, deps_dir: Optional[Path] = None) -> Optional[Path]:
         deps_cache = None
@@ -251,8 +255,8 @@ class BuildTool:
             sys.exit(1)
 
     def set_build_type(self, build_type: str):
-        if build_type in ["Release", "Debug"]:
-            self.build_type = build_type
+        if build_type in build_types:
+            self.build_type = build_type[0].upper() + build_type[1:].lower()
         else:
             self.printer.error(f"Unsupported build type: {build_type}")
             sys.exit(1)
@@ -365,16 +369,15 @@ def depencies_check():
 def main():
     parser = argparse.ArgumentParser(description="算法工具包构建和测试脚本")
     parser.add_argument("--clean", "-c", action="store_true", help="清理构建目录")
-    parser.add_argument("--clean-all", "-ca",
-                        action="store_true", help="完全清理构建目录")
-    parser.add_argument("--release", "-r",
-                        action="store_true", help="以realse模式构建")
-    parser.add_argument(
-        "--debug", "-d", action="store_true", help="以debug模式构建")
+    parser.add_argument("--clean-all", "-rm*", action="store_true", help="完全清理构建目录")
+    parser.add_argument("--build-type", "-bt", choices=build_types, default="release", help="以realse模式构建")
+    
+    parser.add_argument("--debug", action="store_true", help="debug 模式")
+    parser.add_argument("--release", action="store_true", help="release 模式")
     parser.add_argument("--test", "-t", action="store_true", help="运行所有测试")
     parser.add_argument("--all", "-a", action="store_true",help="执行完整流程（智能清理、构建、测试、示例")
     parser.add_argument("--c-compiler", choices=c_compilers, help="指定C编译器")
-    parser.add_argument("--cpp-compiler", choices=cxx_compilers, help="指定C++编译器")
+    parser.add_argument("--cxx-compiler", choices=cxx_compilers, help="指定C++编译器")
     parser.add_argument("--c-standar", choices=c_standards, help="指定C标准")
     parser.add_argument("--cxx-standar", choices=cxx_standards, help="指定C++标准")
     parser.add_argument("--make", "-m", action="store_true", help="直接执行make")
@@ -395,27 +398,26 @@ def main():
     elif args.make:
         buildTool.build()
         sys.exit(0)
+        
+    if args.debug:
+        buildTool.set_build_type("Debug")
+    elif args.release:
+        buildTool.set_build_type("Release")
+    elif args.build_type:
+        buildTool.set_build_type(args.build_type)
 
     if args.c_compiler:
         buildTool.set_c_compiler(args.c_compiler)
-    if args.cpp_compiler:
-        buildTool.set_cpp_compiler(args.cpp_compiler)
+    if args.cxx_compiler:
+        buildTool.set_cpp_compiler(args.cxx_compiler)
     if args.c_standar:
         buildTool.set_c_standar(args.c_standar)
     if args.cxx_standar:
         buildTool.set_cxx_standar(args.cxx_standar)
-
     if args.generator:
         buildTool.set_generator(args.generator)
-
-    buildType: str = "Release"
-    if args.release:
-        buildType = "Release"
-    elif args.debug:
-        buildType = "Debug"
-
+    
     depencies_check()
-    buildTool.set_build_type(buildType)
     buildTool.prepare_cmake()
     buildTool.build()
 

@@ -34,11 +34,13 @@ set(MODULE_LIST
     data_structures 
     graph 
     dynamic_programming
+    util
 )
+set(TARGET_LIST)
 
 foreach(MODULE IN LISTS MODULE_LIST)
     string(TOUPPER "${MODULE}" MODULE_UPPER)
-    
+
     file(GLOB_RECURSE ${MODULE_UPPER}_SOURCES src/${MODULE}/*.c)
     file(GLOB_RECURSE ${MODULE_UPPER}_HEADERS include/${MODULE}/*.h)
     list(LENGTH ${MODULE_UPPER}_SOURCES SOUECE_FILE_COUNT)
@@ -62,6 +64,7 @@ if(ALL_SOURCES)
     target_include_directories(algorithms_toolkit PUBLIC include)
     # 链接数学库和实时库（POSIX）
     target_link_libraries(algorithms_toolkit m rt)
+    list(APPEND TARGET_LIST algorithms_toolkit)
 endif()
 
 
@@ -70,8 +73,9 @@ foreach(MODULE IN LISTS MODULE_LIST)
     string(TOUPPER "${MODULE}" MODULE_UPPER)    
     if (${MODULE_UPPER}_SOURCES OR ${MODULE_UPPER}_HEADERS)
         message("-- 生成 ${MODULE} 模块独立库")
-        add_library(algorithms_${MODULE} STATIC ${${MODULE_UPPER}_SOURCES} ${${MODULE_UPPER}_HEADERS})
-        target_include_directories(algorithms_${MODULE} PUBLIC include)
+        add_library(${MODULE} STATIC ${${MODULE_UPPER}_SOURCES} ${${MODULE_UPPER}_HEADERS})
+        target_include_directories(${MODULE} PUBLIC include)
+        list(APPEND TARGET_LIST ${MODULE})
     endif()
 endforeach()
 
@@ -146,6 +150,27 @@ set(CTEST_NIGHTLY_START_TIME "00:00:00 EST")
 set(CTEST_DROP_METHOD "http")
 
 # ============================================================================
+# 测试工具库
+# ============================================================================
+set(test_util_lib "test_utils")
+file(GLOB_RECURSE TEST_UTIL_SOURCES tests/util/*.cpp tests/util/*.c)
+file(GLOB_RECURSE TEST_UTIL_HEADERS tests/util/*.h)
+
+if (TEST_UTIL_SOURCES)
+    add_library(${test_util_lib} STATIC
+        ${TEST_UTIL_SOURCES} 
+        ${TEST_UTIL_HEADERS}
+    )
+
+    target_include_directories(${test_util_lib} PUBLIC
+        ${CMAKE_SOURCE_DIR}/tests/util
+        ${CMAKE_SOURCE_DIR}/tests
+    )
+endif()
+
+
+
+# ============================================================================
 # 测试目标
 # ============================================================================
 
@@ -154,12 +179,14 @@ file(GLOB_RECURSE TEST_SOURCES tests/*.cpp)
 
 if(TEST_SOURCES)
     # 创建主测试可执行文件
-    add_executable(algorithms_tests ${TEST_SOURCES})
+    add_executable(algorithms_tests ${TEST_SOURCES} ${TEST_UTIL_HEADERS})
+    list(APPEND TARGET_LIST algorithms_tests)  
     
     # 链接依赖
     target_link_libraries(algorithms_tests
         algorithms_toolkit
         ${GTEST_LIBRARIES}
+        test_utils
     )
     
     # 如果使用缓存或FetchContent，需要包含Google Test的头文件
@@ -168,6 +195,10 @@ if(TEST_SOURCES)
             ${googletest_SOURCE_DIR}/googletest/include
         )
     endif()
+    target_include_directories(algorithms_tests PRIVATE
+        ${CMAKE_SOURCE_DIR}/test/util
+        ${CMAKE_SOURCE_DIR}/test
+    )
     
     # 添加测试到CTest
     add_test(NAME algorithms_unit_tests COMMAND algorithms_tests)
@@ -176,78 +207,51 @@ if(TEST_SOURCES)
     foreach(MODULE IN LISTS MODULE_LIST)
         file(GLOB MODULE_TEST_SOURCES tests/${MODULE}/*.cpp)
         if(MODULE_TEST_SOURCES)
-            add_executable(algorithms_${MODULE}_tests ${MODULE_TEST_SOURCES})
-            target_link_libraries(algorithms_${MODULE}_tests
+            add_executable(${MODULE}_tests ${MODULE_TEST_SOURCES})
+
+            target_include_directories(${MODULE}_tests PRIVATE
+                tests/util
+                tests
+            )
+
+            target_link_libraries(${MODULE}_tests
+                test_utils
                 algorithms_toolkit
                 ${GTEST_LIBRARIES}
             )
-            
-            # 为模块测试添加覆盖率和sanitizer支持（Debug模式）
-            if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-                if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-                    target_compile_options(algorithms_${MODULE}_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-                    target_link_options(algorithms_${MODULE}_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-                endif()
-            endif()
-            
+
             if(NOT GTest_FOUND)
-                target_include_directories(algorithms_${MODULE}_tests PRIVATE
+                target_include_directories(${MODULE}_tests PRIVATE
                     ${googletest_SOURCE_DIR}/googletest/include
                 )
             endif()
-            add_test(NAME algorithms_${MODULE}_unit_tests COMMAND algorithms_${MODULE}_tests)
+            
+            add_test(NAME ${MODULE}_unit_tests COMMAND ${MODULE}_tests)
+            list(APPEND TARGET_LIST ${MODULE}_tests)
         endif()
-    endforeach()
+    endforeach()    
 endif()
 
 
 # ============================================================================
 # 代码覆盖率和Sanitizer（Debug模式）
 # ============================================================================
-
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
-        # 为主库添加覆盖率和sanitizer支持
-        target_compile_options(algorithms_toolkit PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        target_link_options(algorithms_toolkit PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        
-        # 为各模块库也添加覆盖率和sanitizer支持
-        if(TARGET algorithms_sorting)
-            target_compile_options(algorithms_sorting PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-            target_link_options(algorithms_sorting PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        endif()
-        
-        if(TARGET algorithms_searching)
-            target_compile_options(algorithms_searching PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-            target_link_options(algorithms_searching PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        endif()
-        
-        if(TARGET algorithms_data_structures)
-            target_compile_options(algorithms_data_structures PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-            target_link_options(algorithms_data_structures PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        endif()
-        
-        if(TARGET algorithms_graph)
-            target_compile_options(algorithms_graph PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-            target_link_options(algorithms_graph PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        endif()
-        
-        if(TARGET algorithms_dp)
-            target_compile_options(algorithms_dp PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-            target_link_options(algorithms_dp PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        endif()
-        
-        # 为测试目标添加覆盖率和sanitizer支持
-        if(TARGET algorithms_tests)
-            target_compile_options(algorithms_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-            target_link_options(algorithms_tests PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
-        endif()
+        # 为各模块库添加覆盖率和sanitizer支持
+        foreach(MODULE IN LISTS TARGET_LIST)
+            if(TARGET ${MODULE})
+                message("Adding coverage and sanitizer support for algorithms_${MODULE}")
+                target_compile_options(${MODULE} PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+                target_link_options(${MODULE} PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
+            endif()
+        endforeach()
     endif()
 endif()
 
-# ============================================================================
-# 自定义目标
-# ============================================================================
+
+
+
 
 # 运行所有测试
 add_custom_target(run_tests
@@ -320,11 +324,7 @@ elseif(GOOGLETEST_CACHED)
 else()
     message(STATUS "Google Test: Downloaded")
 endif()
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Coverage support: ON")
-else()
-    message(STATUS "Coverage support: OFF")
-endif()
+
 message(STATUS "Modules found:")
 if(SORTING_SOURCES)
     list(LENGTH SORTING_SOURCES SORTING_COUNT)

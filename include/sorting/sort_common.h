@@ -31,6 +31,13 @@ typedef struct {
 void incre_comparisons(sort_stats_t *stats);
 void incre_movements(sort_stats_t *stats);
 
+#ifdef DEBUG
+#define INCRE_COMPARITIONS(stats) incre_comparisons(stats)
+#define INCRE_MOVEMENTS(stats) incre_movements(stats)
+#else
+#define INCRE_COMPARITIONS(stats)
+#define INCRE_MOVEMENTS(stats)
+#endif
 
 typedef int (*generic_compare_func_t)(const void * const a, const void * const b);
 typedef int (*int_compare_func_t)(const int a, const int b);
