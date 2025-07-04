@@ -19,6 +19,12 @@ build_types: list[str] = ["debug", "release", "Debug", "Release"]
 
 make: str = "Unix Makefiles"
 ninja: str = "Ninja"
+gcc: str = "gcc"
+gpp: str = "g++"
+clang: str = "clang"
+clangpp: str = "clang++"
+icc: str = "icc"
+icx: str = "icx"
 
 valid_generators = [make,
                     ninja, "Xcode", "Visual Studio 16 2019"]
@@ -189,7 +195,7 @@ class BuildTool:
         self.build_type: str = "Release"
         self.c_standar: str = "23"
         self.cxx_standar: str = "23"
-        self.generator: str = "Ninja"
+        self.generator: str = ninja
 
     def __mv_deps_to_tmp(self, deps_dir: Optional[Path] = None) -> Optional[Path]:
         deps_cache = None

@@ -3,7 +3,7 @@
 #include "sorting/insertion_sort.h"
 
 
-sort_result_t generic_insertion_sort(void *arr[], size_t len, generic_compare_func_t cmp, sort_stats_t* stats) {
+sort_result_t generic_insertion_sort(void *arr[], size_t len, compare_func_t cmp, sort_stats_t* stats) {
     if (NULL == arr || NULL == cmp) {
         return SORT_ERROR_NULL_POINTER;
     }
@@ -28,7 +28,7 @@ sort_result_t generic_insertion_sort(void *arr[], size_t len, generic_compare_fu
 }
 
 
-sort_result_t generic_insertion_sort_with_binary_search(void *arr[], size_t len, generic_compare_func_t cmp, sort_stats_t *stats) {
+sort_result_t generic_insertion_sort_with_binary_search(void *arr[], size_t len, compare_func_t cmp, sort_stats_t *stats) {
 
     if (NULL == arr || NULL == cmp) {
         return SORT_ERROR_NULL_POINTER;

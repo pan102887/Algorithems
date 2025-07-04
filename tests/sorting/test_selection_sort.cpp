@@ -1,66 +1,54 @@
-#include <vector>
 #include <gtest/gtest.h>
+#include <gtest/gtest-printers.h>
+#include "util/test_data_util.h"
 #include "sorting/selection_sort.h"
-#include "test_data_util.h"
 
 
 
-class SelectionSortTest : public testing::Test {
-protected:
-    std::vector<int> int_data;
-    std::vector<int> expected_data;
-
-    void SetUp() override {
-        for (int i =0; i < 20; i++) {
-            expected_data.push_back(i);
-        }
-        int_data = Shuffle<int>::shuffle_vector(expected_data);
-    }
-};
-
-TEST_F(SelectionSortTest, NullPointerHandling) {
+TEST(selection_sort_test, NullPointerTest) {
     sort_stats_t stats;
-    EXPECT_EQ(generic_selection_sort(nullptr, 10, compare_integers, &stats), SORT_ERROR_NULL_POINTER);
     
-    void** arr = reinterpret_cast<void**>(int_data.data());
-    EXPECT_EQ(generic_selection_sort(arr, 10, nullptr, &stats), SORT_ERROR_NULL_POINTER);
-}
-
-TEST_F(SelectionSortTest, EmptyArrayHandling) {
-    sort_stats_t stats;
-    void** arr = reinterpret_cast<void**>(int_data.data());
-
-    EXPECT_EQ(generic_selection_sort(arr, 0, compare_integers, &stats), SORT_SUCCESS);
-}
-
-TEST_F(SelectionSortTest, SingleElementArray) {
-    sort_stats_t stats;
-    std::vector<int> single_element = {42};
-    auto data = single_element.data();
-    void **arr = new void*[single_element.size()];
-    for(size_t i = 0; i < single_element.size(); i++) {
-        arr[i] = &data[i];
+    EXPECT_EQ(selection_sort(nullptr, 10, compare_integers, integers_swap, &stats), SORT_ERROR_NULL_POINTER);
+    
+    int arr[10] = {64, 34, 25, 12, 22, 11, 90, 45, 78, 23};
+    void* arr_ptr[10];
+    for (size_t i = 0; i < 10; i++) {
+        arr_ptr[i] = &arr[i];
     }
 
-    EXPECT_EQ(generic_selection_sort(arr, 1, compare_integers, &stats), SORT_SUCCESS);
-    EXPECT_EQ(single_element[0], 42);
-    delete[] arr;
+    EXPECT_EQ(selection_sort(arr_ptr, 10, nullptr, integers_swap, &stats), SORT_ERROR_NULL_POINTER);
 }
 
-TEST_F(SelectionSortTest, SortFunctionality) {
+TEST(generic_selection_sort_test, NativeArrayTest) {
     sort_stats_t stats;
-    auto data = int_data.data();
-    
-    
-    
-    
-    
-    EXPECT_EQ(generic_selection_sort((void **)(data), int_data.size(), compare_integers, &stats), SORT_SUCCESS);
-    
-    for (size_t i = 0; i < int_data.size(); i++) {
-        EXPECT_EQ(data[i], expected_data[i]);
+    #define array_size 1000
+    int sorted_int_arr[array_size];
+    for (int i = 0; i < array_size; i++) {
+        sorted_int_arr[i] = i;
     }
-    
+    auto shuffled = Shuffle<int>::shuffle_array(sorted_int_arr);
+    int shuffled_int_arr[array_size];
+    for (auto i : shuffled) {
+        shuffled_int_arr[i] = i;
+    }
+
+    generic_selection_sort(shuffled_int_arr, sizeof(int), array_size, compare_integers, integers_swap, &stats);
+    EXPECT_TRUE(std::equal(std::begin(sorted_int_arr), std::end(sorted_int_arr), shuffled_int_arr));
+    EXPECT_FALSE(std::equal(std::begin(sorted_int_arr), std::end(sorted_int_arr), shuffled.begin()));
+    #undef array_size
 }
 
 
+TEST(generic_selection_sort_test, VectorTest) {
+    sort_stats_t stats;
+    std::vector<int> sorted_int_vector;
+    for (int i = 0; i < 1000; i++) {
+        sorted_int_vector.push_back(i);
+    }
+    auto shuffled = Shuffle<int>::shuffle_vector(sorted_int_vector);
+    auto shuffled_data = shuffled.data();
+    EXPECT_FALSE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_data));
+    generic_selection_sort(shuffled_data, sizeof(int), shuffled.size(), compare_integers, integers_swap, &stats);
+    EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_data));
+    EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled.begin()));
+}

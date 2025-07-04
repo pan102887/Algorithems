@@ -39,11 +39,21 @@ void incre_movements(sort_stats_t *stats);
 #define INCRE_MOVEMENTS(stats)
 #endif
 
-typedef int generic_compare_func_t(const void * const a, const void * const b);
-typedef void generic_swap_func_t(void * const a, void * const b);
+#define GENERIC_SAMP_SIZE_SWAP(size, ap, bp) \
+  do {\
+    if ((size) <= 0) break;\
+    size_t __SIZE = (size);\
+    for (size_t i = 0; i < __SIZE; i++) {\
+      ((char *)(ap))[i] = ((char *)(ap))[i] ^ ((char *)(bp))[i];\
+      ((char *)(bp))[i] = ((char *)(ap))[i] ^ ((char *)(bp))[i];\
+      ((char *)(ap))[i] = ((char *)(ap))[i] ^ ((char *)(bp))[i];\
+    }\
+  } while (0)
 
-typedef int int_compare_func_t(const int a, const int b);
-typedef int string_compare_func_t(const char * const a, const char * const b);
+
+typedef int compare_func_t(const void * const a, const void * const b);
+typedef void swap_func_t(void * const a, void * const b);
+
 
 /**
  * ===========================================================================
@@ -52,6 +62,8 @@ typedef int string_compare_func_t(const char * const a, const char * const b);
  */
 
 int compare_integers(const void * const a, const void * const b);
+int generic_int_cmp(const int * const a, const int * const b);
+void integers_swap(void * const a, void * const b);
 int compare_strings(const void * const a, const void * const b);
 
 

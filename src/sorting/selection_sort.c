@@ -1,31 +1,65 @@
 #include "sorting/selection_sort.h"
 
-sort_result_t generic_selection_sort(void *arr[], size_t len, generic_compare_func_t cmp, sort_stats_t *stats) {
+
+sort_result_t selection_sort(
+    void* arr[],
+    size_t len,
+    compare_func_t cmp,
+    swap_func_t swap_fun,
+    sort_stats_t* stats
+) {
     if (NULL == arr || NULL == cmp) {
         return SORT_ERROR_NULL_POINTER;
     }
-    if (len <= 1) {
+
+    if (len == 0 || len == 1) {
         return SORT_SUCCESS;
     }
 
     for (size_t i = 0; i < len - 1; i++) {
-
-        void **min_elem = arr + i;
-        for (size_t j = i; j < len; j++) {
+        size_t min_index = i;
+        for (size_t j = i + 1; j < len; j++) {
             INCRE_COMPARITIONS(stats);
-            if (cmp(*min_elem, arr[j]) > 0) {
-                min_elem = arr + j;
+            if (cmp(arr[j], arr[min_index]) < 0) {
+                min_index = j;
             }
         }
-
-        INCRE_COMPARITIONS(stats);
-        if (min_elem != arr + i) {
-            void *temp = arr[i];
-            arr[i] = *min_elem;
-            *min_elem = temp;
+        if (min_index != i) {
+            swap_fun(arr[i], arr[min_index]);
             INCRE_MOVEMENTS(stats);
         }
     }
+    return SORT_SUCCESS;
+}
 
+
+sort_result_t generic_selection_sort(
+    void* arr,
+    size_t element_size,
+    size_t len,
+    compare_func_t cmp,
+    swap_func_t swap_fun,
+    sort_stats_t* stats
+) {
+    if (NULL == arr || NULL == cmp) {
+        return SORT_ERROR_NULL_POINTER;
+    }
+    if (len == 0 || len == 1) {
+        return SORT_SUCCESS;
+    }
+    
+    for (size_t i = 0; i < len - 1; i++) {
+        size_t min_index = i;
+        for (size_t j = i + 1; j < len; j++) {
+            INCRE_COMPARITIONS(stats);
+            if (cmp((char*)arr + j * element_size, (char*)arr + min_index * element_size) < 0) {
+                min_index = j;
+            }
+        }
+        if (min_index != i) {
+            swap_fun((char*)arr + i * element_size, (char*)arr + min_index * element_size);
+            INCRE_MOVEMENTS(stats);
+        }
+    }
     return SORT_SUCCESS;
 }

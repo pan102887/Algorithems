@@ -17,13 +17,10 @@ set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
 
-# 包含目录
+# PUBLIC 包含目录
 include_directories(include)
 
 
-message(STATUS "=========================================")
-message(STATUS "                 生成主库")
-message(STATUS "=========================================")
 # ============================================================================
 # 收集所有源文件
 # ============================================================================
@@ -43,8 +40,6 @@ foreach(MODULE IN LISTS MODULE_LIST)
 
     file(GLOB_RECURSE ${MODULE_UPPER}_SOURCES src/${MODULE}/*.c)
     file(GLOB_RECURSE ${MODULE_UPPER}_HEADERS include/${MODULE}/*.h)
-    list(LENGTH ${MODULE_UPPER}_SOURCES SOUECE_FILE_COUNT)
-    list(LENGTH ${MODULE_UPPER}_HEADERS HEAD_FILE_COUNT)
     set(ALL_SOURCES ${${MODULE_UPPER}_SOURCES} ${ALL_SOURCES})
     set(ALL_HEADERS ${${MODULE_UPPER}_HEADERS} ${ALL_HEADERS})
 endforeach()
@@ -70,7 +65,7 @@ endif()
 
 # 创建各模块的独立库
 foreach(MODULE IN LISTS MODULE_LIST)
-    string(TOUPPER "${MODULE}" MODULE_UPPER)    
+    string(TOUPPER "${MODULE}" MODULE_UPPER)
     if (${MODULE_UPPER}_SOURCES OR ${MODULE_UPPER}_HEADERS)
         message("-- 生成 ${MODULE} 模块独立库")
         add_library(${MODULE} STATIC ${${MODULE_UPPER}_SOURCES} ${${MODULE_UPPER}_HEADERS})
@@ -81,14 +76,10 @@ endforeach()
 
 
 # ============================================================================
-# 生成 Test 库
+#                                    TEST
 # ============================================================================
 
 
-message("")
-message(STATUS "=========================================")
-message(STATUS "               生成测试用例")
-message(STATUS "=========================================")
 # ============================================================================
 # Google Test 配置
 # ============================================================================
@@ -142,6 +133,11 @@ else()
     set(GOOGLETEST_CACHED FALSE)
 endif()
 
+
+
+# ============================================================================
+# 测试工具库
+# ============================================================================
 # 启用测试
 enable_testing()
 include(CTest)
@@ -149,88 +145,67 @@ set(CTEST_PROJECT_NAME "AlgorithmsToolkit")
 set(CTEST_NIGHTLY_START_TIME "00:00:00 EST")
 set(CTEST_DROP_METHOD "http")
 
-# ============================================================================
-# 测试工具库
-# ============================================================================
-set(test_util_lib "test_utils")
-file(GLOB_RECURSE TEST_UTIL_SOURCES tests/util/*.cpp tests/util/*.c)
-file(GLOB_RECURSE TEST_UTIL_HEADERS tests/util/*.h)
-
-if (TEST_UTIL_SOURCES)
-    add_library(${test_util_lib} STATIC
-        ${TEST_UTIL_SOURCES} 
-        ${TEST_UTIL_HEADERS}
-    )
-
-    target_include_directories(${test_util_lib} PUBLIC
-        ${CMAKE_SOURCE_DIR}/tests/util
-        ${CMAKE_SOURCE_DIR}/tests
-    )
-endif()
-
-
-
-# ============================================================================
-# 测试目标
-# ============================================================================
+set(TEST_DIR ${CMAKE_SOURCE_DIR}/tests)
+file(GLOB  TEST_ITEMS RELATIVE ${TEST_DIR} "${TEST_DIR}/*/")
+set(TEST_MODULES)
+set(TEST_MODULES_DIRS)
 
 # 收集所有测试文件
-file(GLOB_RECURSE TEST_SOURCES tests/*.cpp)
+file(GLOB_RECURSE TEST_SOURCES ${TEST_DIR}/*.cpp)
+foreach(MODULE IN LISTS TEST_ITEMS)
+     if(IS_DIRECTORY ${TEST_DIR}/${MODULE})
+        list(APPEND TEST_MODULES ${MODULE})
+        list(APPEND TEST_MODULES_DIRS ${TEST_DIR}/${MODULE})
+        message(STATUS "Found test module: ${MODULE}")
+        
+        string(TOUPPER "${MODULE}" MODULE_UPPER)
+        file(GLOB_RECURSE ${MODULE_UPPER}_SOURCES ${TEST_DIR}/${MODULE}/*.c ${TEST_DIR}/${MODULE}/*.cpp)
+        set(TEST_SOURCES ${TEST_SOURCES} ${MODULE_UPPER}_SOURCES)
 
-if(TEST_SOURCES)
-    # 创建主测试可执行文件
-    add_executable(algorithms_tests ${TEST_SOURCES} ${TEST_UTIL_HEADERS})
-    list(APPEND TARGET_LIST algorithms_tests)  
-    
-    # 链接依赖
-    target_link_libraries(algorithms_tests
-        algorithms_toolkit
-        ${GTEST_LIBRARIES}
-        test_utils
-    )
-    
-    # 如果使用缓存或FetchContent，需要包含Google Test的头文件
-    if(NOT GTest_FOUND)
-        target_include_directories(algorithms_tests PRIVATE
-            ${googletest_SOURCE_DIR}/googletest/include
-        )
+        file(GLOB_RECURSE ${MODULE_UPPER}_HEADERS ${TEST_DIR}/${MODULE}/*.h)
     endif()
-    target_include_directories(algorithms_tests PRIVATE
-        ${CMAKE_SOURCE_DIR}/test/util
-        ${CMAKE_SOURCE_DIR}/test
-    )
-    
-    # 添加测试到CTest
-    add_test(NAME algorithms_unit_tests COMMAND algorithms_tests)
-    
-    # 为每个模块创建独立的测试（如果需要）
-    foreach(MODULE IN LISTS MODULE_LIST)
-        file(GLOB MODULE_TEST_SOURCES tests/${MODULE}/*.cpp)
-        if(MODULE_TEST_SOURCES)
-            add_executable(${MODULE}_tests ${MODULE_TEST_SOURCES})
+endforeach()
+list(APPEND ${TEST_MODULES_DIRS} ${CMAKE_SOURCE_DIR}/tests)
 
-            target_include_directories(${MODULE}_tests PRIVATE
-                tests/util
-                tests
-            )
 
-            target_link_libraries(${MODULE}_tests
-                test_utils
+# # ============================================================================
+# # 生成测试库
+# # ============================================================================
+# set(TEST_LIBS)
+# foreach(MODULE IN LISTS TEST_MODULES)
+#     string(TOUPPER "${MODULE}" MODULE_UPPER)
+#     if(${MODULE_UPPER}_SOURCES)
+#         add_library(test_${MODULE}_lib STATIC
+#             ${${MODULE_UPPER}_SOURCES} 
+#             ${${MODULE_UPPER}_HEADERS}
+#         )
+#         target_include_directories(test_${MODULE}_lib PUBLIC ${TEST_DIR})
+#         list(APPEND ${TEST_LIBS} test_${MODULE}_lib)
+#     endif()    
+# endforeach()
+
+# ============================================================================
+# 生成单元测试可执行文件
+# ============================================================================
+foreach(MODULE IN LISTS TEST_MODULES)
+    string(TOUPPER "${MODULE}" MODULE_UPPER)
+    if(${MODULE_UPPER}_SOURCES)
+        add_executable(${MODULE}_tests ${${MODULE_UPPER}_SOURCES})
+        target_include_directories(${MODULE}_tests PUBLIC ${TEST_DIR})
+        target_link_libraries(${MODULE}_tests
+                ${TEST_LIBS}
                 algorithms_toolkit
                 ${GTEST_LIBRARIES}
-            )
-
-            if(NOT GTest_FOUND)
-                target_include_directories(${MODULE}_tests PRIVATE
+        )
+        if(NOT GTest_FOUND)
+                target_include_directories(${MODULE}_tests PUBLIC
                     ${googletest_SOURCE_DIR}/googletest/include
                 )
-            endif()
-            
-            add_test(NAME ${MODULE}_unit_tests COMMAND ${MODULE}_tests)
-            list(APPEND TARGET_LIST ${MODULE}_tests)
         endif()
-    endforeach()    
-endif()
+        add_test(NAME ${MODULE}_unit_tests COMMAND ${MODULE}_tests)
+        list(APPEND TARGET_LIST ${MODULE}_tests)
+    endif()    
+endforeach()
 
 
 # ============================================================================
@@ -241,7 +216,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
         # 为各模块库添加覆盖率和sanitizer支持
         foreach(MODULE IN LISTS TARGET_LIST)
             if(TARGET ${MODULE})
-                message("Adding coverage and sanitizer support for algorithms_${MODULE}")
+                message(STATUS "Adding coverage and sanitizer support for ${MODULE}")
                 target_compile_options(${MODULE} PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
                 target_link_options(${MODULE} PRIVATE --coverage -fsanitize=address -fsanitize=undefined)
             endif()
