@@ -1,28 +1,56 @@
-#include "sorting/merge_sort.h"
 #include <gtest/gtest.h>
 #include <random>
 #include <vector>
 #include <string>
 #include <algorithm>
+#include "sorting/merge_sort.h"
+#include "util/test_data_util.h"
 
-class MergeSortTest : public ::testing::Test {
+#define TEST_DATA_SIZE 10000
+class MergeSortTest : public ::testing::Test, public TestDataUtil
+{
 protected:
-    std::vector<int> test_int_data;
-    std::vector<int> expected_int_data;
-
-    std::vector<std::string> test_string_data;
-    std::vector<std::string> expected_string_data;
-
-    void SetUp() override {
-        // 初始化测试数据
-        test_int_data = {64, 34, 25, 12, 22, 11, 90};
-        expected_int_data = {11, 12, 22, 25, 34, 64, 90};
-
-        test_string_data = {"banana", "apple", "cherry", "date", "elderberry"};
-        expected_string_data = {"apple", "banana", "cherry", "date", "elderberry"};
+    MergeSortTest() : TestDataUtil(TEST_DATA_SIZE) {}
+    void SetUp() override
+    {
+       
     }
 
-    void TearDown() override {
+    void TearDown() override
+    {
+        // 清理资源
     }
-
 };
+
+TEST_F(MergeSortTest, NullPointerHandling) {
+    sort_stats_t stats;
+    void **arr = nullptr;
+    EXPECT_EQ(generic_merge_sort(arr, 1, sizeof(void*), compare_integers, &stats), SORT_ERROR_NULL_POINTER);
+}
+
+TEST_F(MergeSortTest, EmptyArrayHandling) {
+    sort_stats_t stats;
+    void *arr[1];
+    EXPECT_EQ(generic_merge_sort(arr, 1, sizeof(void*), compare_integers, &stats), SORT_SUCCESS);
+}
+
+TEST_F(MergeSortTest, IntegerArrSortTest) {
+    sort_stats_t stats;
+    auto shuffled = get_shuffled_int_vector();
+    auto data = shuffled.data();
+    
+
+    RECORD_ARR_LEN(&stats, shuffled.size());
+    RECORD_ELEMENT_SIZE(&stats, sizeof(int));
+    START_TIMMING(&stats);
+    generic_merge_sort(data, shuffled.size(), sizeof(int), compare_integers, &stats);
+    STOP_TIMMING(&stats);
+    EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled.begin()));
+    PRINT_STATS(&stats, Merge Sort);
+    for (int i = 0; i < 20; i++) {
+        printf("%d ", shuffled[i]);
+    }
+    printf("\n");
+}
+
+#undef TEST_DATA_SIZE

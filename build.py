@@ -15,6 +15,9 @@ import multiprocessing
 project_name: str = "Algorithems"
 project_root: Path = Path.cwd()
 
+debug_type: str = "Debug"
+release_type: str = "Release"
+
 build_types: list[str] = ["debug", "release", "Debug", "Release"]
 
 make: str = "Unix Makefiles"
@@ -190,12 +193,13 @@ class BuildTool:
         self.printer = printer if printer else Printer()
         self.project_root = Path.cwd()
         self.build_dir = self.project_root / "build"
-        self.cpp_compiler: str = "g++"
-        self.c_compiler: str = "gcc"
+        self.cpp_compiler: str = gpp
+        self.c_compiler: str = gcc
         self.build_type: str = "Release"
         self.c_standar: str = "23"
         self.cxx_standar: str = "23"
         self.generator: str = ninja
+        self.defines: list[str] = []
 
     def __mv_deps_to_tmp(self, deps_dir: Optional[Path] = None) -> Optional[Path]:
         deps_cache = None
@@ -352,13 +356,13 @@ class BuildTool:
 def depencies_check():
     printer.header(f"DEPENDENCIES CHECK")
     required: list[str] = [
-        "gcc",
-        "g++",
+        gcc,
+        gpp,
         "cmake",
     ]
     required: list[DependencyElement] = [
-        DependencyElement("gcc"),
-        DependencyElement("g++"),
+        DependencyElement(gcc),
+        DependencyElement(gpp),
         DependencyElement("cmake"),
     ]
     exit: bool = False
@@ -406,9 +410,9 @@ def main():
         sys.exit(0)
         
     if args.debug:
-        buildTool.set_build_type("Debug")
+        buildTool.set_build_type(debug_type)
     elif args.release:
-        buildTool.set_build_type("Release")
+        buildTool.set_build_type(release_type)
     elif args.build_type:
         buildTool.set_build_type(args.build_type)
 

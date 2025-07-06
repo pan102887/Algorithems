@@ -8,10 +8,12 @@ sort_result_t selection_sort(
     swap_func_t swap_fun,
     sort_stats_t* stats
 ) {
+    INCRE_COMPARISONS(stats);
     if (NULL == arr || NULL == cmp) {
         return SORT_ERROR_NULL_POINTER;
     }
 
+    INCRE_COMPARISONS(stats);
     if (len == 0 || len == 1) {
         return SORT_SUCCESS;
     }
@@ -19,14 +21,14 @@ sort_result_t selection_sort(
     for (size_t i = 0; i < len - 1; i++) {
         size_t min_index = i;
         for (size_t j = i + 1; j < len; j++) {
-            INCRE_COMPARITIONS(stats);
+            INCRE_COMPARISONS(stats);
             if (cmp(arr[j], arr[min_index]) < 0) {
                 min_index = j;
             }
         }
         if (min_index != i) {
-            swap_fun(arr[i], arr[min_index]);
             INCRE_MOVEMENTS(stats);
+            swap_fun(arr[i], arr[min_index]);
         }
     }
     return SORT_SUCCESS;
@@ -41,9 +43,11 @@ sort_result_t generic_selection_sort(
     swap_func_t swap_fun,
     sort_stats_t* stats
 ) {
+    INCRE_COMPARISONS(stats);
     if (NULL == arr || NULL == cmp) {
         return SORT_ERROR_NULL_POINTER;
     }
+    INCRE_COMPARISONS(stats);
     if (len == 0 || len == 1) {
         return SORT_SUCCESS;
     }
@@ -51,11 +55,12 @@ sort_result_t generic_selection_sort(
     for (size_t i = 0; i < len - 1; i++) {
         size_t min_index = i;
         for (size_t j = i + 1; j < len; j++) {
-            INCRE_COMPARITIONS(stats);
+            INCRE_COMPARISONS(stats);
             if (cmp((char*)arr + j * element_size, (char*)arr + min_index * element_size) < 0) {
                 min_index = j;
             }
         }
+        INCRE_COMPARISONS(stats);
         if (min_index != i) {
             swap_fun((char*)arr + i * element_size, (char*)arr + min_index * element_size);
             INCRE_MOVEMENTS(stats);

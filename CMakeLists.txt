@@ -12,10 +12,21 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
 
 # Debug和Release配置
-set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG")
+set(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG -pg")
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -pg")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -march=native")
+
+set(DEBUG_TYPE "Debug")
+
+
+# ============================================================================
+# 预设宏定义
+# ============================================================================
+if(CMAKE_BUILD_TYPE STREQUAL ${DEBUG_TYPE})
+    
+endif()
+
 
 # PUBLIC 包含目录
 include_directories(include)
