@@ -38,27 +38,25 @@ protected:
 
 TEST_F(InsertionSortTest, NullPointerHandling)
 {
-    sort_stats_t stats;
 
     // 测试空指针处理
-    EXPECT_EQ(generic_insertion_sort(nullptr, 0, 0, compare_integers, &stats),
+    EXPECT_EQ(generic_insertion_sort(nullptr, 0, 0, compare_integers),
               SORT_ERROR_NULL_POINTER);
 
     auto shuffled_vector = get_shuffled_int_vector();
     auto arr = get_vector_data_ptr_arr(shuffled_vector);
-    EXPECT_EQ(generic_insertion_sort((void **)arr, 10, sizeof(int), nullptr, &stats),
+    EXPECT_EQ(generic_insertion_sort((void **)arr, 10, sizeof(int), nullptr),
               SORT_ERROR_NULL_POINTER);
     delete[] arr;
 }
 
 TEST_F(InsertionSortTest, EmptyArrayHandling)
 {
-    sort_stats_t stats;
     auto shuffled_vector = get_shuffled_int_vector();
     auto arr = get_vector_data_ptr_arr(shuffled_vector);
 
     // 测试空数组处理
-    sort_result_t result = generic_insertion_sort((void **)(arr), 0, sizeof(int), compare_integers, &stats);
+    sort_result_t result = generic_insertion_sort((void **)(arr), 0, sizeof(int), compare_integers);
     EXPECT_EQ(result, SORT_SUCCESS);
     delete[] arr;
 }
@@ -75,8 +73,7 @@ TEST_F(InsertionSortTest, SingleElementArray)
     sort_result_t result = generic_insertion_sort(ptr_array.data(),
                                                   ptr_array.size(),
                                                   sizeof(int),
-                                                  compare_integers,
-                                                  &stats);
+                                                  compare_integers);
     STOP_TIMMING(&stats);
     PRINT_STATS(&stats, Insertion Sort);
     EXPECT_EQ(result, SORT_SUCCESS);
@@ -94,8 +91,7 @@ TEST_F(InsertionSortTest, BinaryInsertionSort)
     sort_result_t result = generic_insertion_sort_with_binary_search(ptr_vector.data(),
                                                                      ptr_vector.size(),
                                                                      sizeof(int),
-                                                                     compare_integers,
-                                                                     &stats);
+                                                                     compare_integers);
     STOP_TIMMING(&stats);
     PRINT_STATS(&stats, Insertion Sort);
     EXPECT_EQ(result, SORT_SUCCESS);

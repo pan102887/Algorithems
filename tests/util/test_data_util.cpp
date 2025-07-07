@@ -36,10 +36,16 @@ TEST_F(ShuffleTest, NotShuffleOriginalVector) {
 
 
 TEST_F(ShuffleTest, NotShuffleOriginalArray) {
-    int original_array[20];
-    auto shuffled = Shuffle<int>::shuffle_array(int_array);
+    int original_array[20] {
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+        10, 11, 12, 13, 14, 15, 16, 17, 18, 19
+    };
+    int copied_int_array[20];
+    std::copy(std::begin(original_array), std::end(original_array), std::begin(copied_int_array));
+    auto shuffled = Shuffle<int>::shuffle_array(original_array);
     EXPECT_EQ(std::size(original_array), std::size(shuffled));
     EXPECT_FALSE(std::equal(std::begin(original_array), std::end(original_array), shuffled.begin()));
+    EXPECT_TRUE(std::equal(std::begin(original_array), std::end(original_array), std::begin(copied_int_array), std::end(copied_int_array)));
 }
 
 

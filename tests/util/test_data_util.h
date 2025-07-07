@@ -63,6 +63,32 @@ public:
         }
         return ptr_arr;
     }
+
+    template<size_t N, size_t FROM, size_t TO>
+    static std::vector<int> get_random_int_vecotor() {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::vector<int> vec(N);
+        std::uniform_int_distribution<> dis(FROM, TO);
+        for (size_t i = 0; i < N; ++i) {
+            vec[i] = dis(gen);
+        }
+        return vec;
+    }
+
+    template<size_t N, size_t FROM, size_t TO>
+    static std::vector<long> get_random_long_vecotor() {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::vector<long> vec(N);
+        std::uniform_int_distribution<> dis(FROM, TO);
+        for (size_t i = 0; i < N; ++i) {
+            vec[i] = dis(gen);
+        }
+        return vec;
+    }
+
+    
 };
 
 

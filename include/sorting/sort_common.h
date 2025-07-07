@@ -41,7 +41,8 @@ extern "C"
 
   extern void print_stats(const sort_stats_t *stats);
 
-#if defined(DEBUG) && defined(PRINT_SORTING_INFO)
+
+
 #define START_TIMMING(stats)        \
   do                                \
   {                                 \
@@ -69,6 +70,7 @@ extern "C"
     (stats)->time_elapsed_ms = ((double)((stats)->end_time - (stats)->start_time)) / CLOCKS_PER_SEC * 1000.0; \
   } while (0)
 
+#if defined(PRINT_SORTING_INFO)
 #define INCRE_COMPARISONS(stats) \
   do                             \
   {                              \
@@ -119,6 +121,7 @@ extern "C"
     }                                  \
     (stats)->memory_used -= size;      \
   } while (0)
+#endif // PRINT_SORTING_INFO
 
 #define RECORD_ELEMENT_SIZE(stats, ele_size) \
   do                                         \
@@ -161,18 +164,49 @@ extern "C"
            (stats)->max_mamory_used);             \
   } while (0)
 
-#else
+
+
+#ifndef START_TIMMING
 #define START_TIMMING(stats)
+#endif
+
+#ifndef STOP_TIMMING
 #define STOP_TIMMING(stats)
+#endif
+
+#ifndef INCRE_COMPARISONS
 #define INCRE_COMPARISONS(stats)
+#endif
+
+#ifndef INCRE_MOVEMENTS
 #define INCRE_MOVEMENTS(stats)
+#endif
+
+#ifndef INCRE_MOVEMENTS_BY
 #define INCRE_MOVEMENTS_BY(stats, times)
+#endif
+
+#ifndef INCRE_MEMORY_USED
 #define INCRE_MEMORY_USED(stats, size)
+#endif
+
+#ifndef DECRE_MEMORY_USED
 #define DECRE_MEMORY_USED(stats, size)
+#endif
+
+#ifndef RECORD_ELEMENT_SIZE
 #define RECORD_ELEMENT_SIZE(stats, ele_size)
+#endif
+
+#ifndef RECORD_ARR_LEN
 #define RECORD_ARR_LEN(stats, arr_len)
+#endif
+
+#ifndef PRINT_STATS
 #define PRINT_STATS(stats, sort_type)
 #endif
+
+
 
 #define GENERIC_SAMP_SIZE_SWAP(size, ap, bp)                     \
   do                                                             \

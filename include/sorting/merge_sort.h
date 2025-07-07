@@ -10,8 +10,7 @@ extern "C" {
         void* arr,
         size_t arr_len,
         size_t element_size,
-        compare_func_t cmp,
-        sort_stats_t* stats
+        compare_func_t cmp
     );
 
 

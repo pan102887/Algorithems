@@ -10,15 +10,13 @@ extern "C"
     extern sort_result_t generic_insertion_sort(void *ptr_arr[],
                                          size_t arr_len,
                                          size_t element_size,
-                                         compare_func_t cmp,
-                                         sort_stats_t *stats);
+                                         compare_func_t cmp);
 
     extern sort_result_t generic_insertion_sort_with_binary_search(
         void *ptr_arr[],
         size_t arr_len,
         size_t element_size,
-        compare_func_t cmp,
-        sort_stats_t *stats);
+        compare_func_t cmp);
 
 #ifdef __cplusplus
 }

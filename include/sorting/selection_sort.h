@@ -9,8 +9,7 @@ extern "C" {
         void* arr[],
         size_t len,
         compare_func_t cmp,
-        swap_func_t swap_fun,
-        sort_stats_t* stats
+        swap_func_t swap_fun
     );
 
     extern sort_result_t generic_selection_sort(
@@ -18,8 +17,7 @@ extern "C" {
         size_t element_size,
         size_t len,
         compare_func_t cmp,
-        swap_func_t swap_fun,
-        sort_stats_t* stats
+        swap_func_t swap_fun
     );
 
 #ifdef __cplusplus
