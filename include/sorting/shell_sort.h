@@ -9,6 +9,13 @@ extern "C" {
 // 有序数组交织在一起组成的数组。在进行排序时，如果H很大，就
 // 能将元素移动到很远的地方，为实现更小的H有序数组奠定基础。
 // 1
+
+extern sort_result_t generic_shell_sort(
+    void *arr,
+    size_t arr_len,
+    size_t element_size,
+    compare_func_t cmp
+);
  
 
 #ifdef __cplusplus

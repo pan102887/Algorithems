@@ -231,9 +231,9 @@ extern "C"
   typedef int compare_func_t(const void *const a, const void *const b);
   typedef void swap_func_t(void *const a, void *const b);
 
-  int compare_integers(const void *const a, const void *const b);
-  void integers_swap(void *const a, void *const b);
-  int compare_strings(const void *const a, const void *const b);
+  extern int compare_integers(const void *const a, const void *const b);
+  extern void swap_integers(void *const a, void *const b);
+  extern int compare_strings(const void *const a, const void *const b);
 
 #ifdef __cplusplus
 }

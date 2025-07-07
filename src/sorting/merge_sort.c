@@ -5,14 +5,14 @@
 #define INDEX_OF(start_ptr, element_size, index) \
     ((char *)(start_ptr) + ((index) * (element_size)))
 
-static sort_result_t internal_merge_sort(
+static inline sort_result_t internal_merge_sort(
     void *arr,
     size_t left,
     size_t right,
     size_t element_size,
     compare_func_t cmp);
 
-static sort_result_t merge(
+static inline sort_result_t merge(
     void *arr,
     size_t left,
     size_t mid,
@@ -41,7 +41,7 @@ sort_result_t generic_merge_sort(
     return internal_merge_sort(arr, 0, arr_len - 1, element_size, cmp);
 }
 
-static sort_result_t internal_merge_sort(
+static inline sort_result_t internal_merge_sort(
     void *arr,
     size_t left,
     size_t right,
@@ -65,7 +65,7 @@ static sort_result_t internal_merge_sort(
     return SORT_SUCCESS;
 }
 
-static sort_result_t merge(
+static inline sort_result_t merge(
     void *arr,
     size_t left,
     size_t mid,

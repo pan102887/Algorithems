@@ -8,7 +8,7 @@
 
 TEST(selection_sort_test, NullPointerTest) {
     
-    EXPECT_EQ(selection_sort(nullptr, 10, compare_integers, integers_swap), SORT_ERROR_NULL_POINTER);
+    EXPECT_EQ(selection_sort(nullptr, 10, compare_integers, swap_integers), SORT_ERROR_NULL_POINTER);
     
     int arr[10] = {64, 34, 25, 12, 22, 11, 90, 45, 78, 23};
     void* arr_ptr[10];
@@ -16,7 +16,7 @@ TEST(selection_sort_test, NullPointerTest) {
         arr_ptr[i] = &arr[i];
     }
 
-    EXPECT_EQ(selection_sort(arr_ptr, 10, nullptr, integers_swap), SORT_ERROR_NULL_POINTER);
+    EXPECT_EQ(selection_sort(arr_ptr, 10, nullptr, swap_integers), SORT_ERROR_NULL_POINTER);
 }
 
 TEST(generic_selection_sort_test, NativeIntArrayTest) {
@@ -33,7 +33,7 @@ TEST(generic_selection_sort_test, NativeIntArrayTest) {
     START_TIMMING(&stats);
     RECORD_ARR_LEN(&stats, shuffled.size());
     RECORD_ELEMENT_SIZE(&stats, sizeof(int));
-    generic_selection_sort(shuffled_int_arr, sizeof(int), TEST_DATA_SIZE, compare_integers, integers_swap);
+    generic_selection_sort(shuffled_int_arr, sizeof(int), TEST_DATA_SIZE, compare_integers, swap_integers);
     STOP_TIMMING(&stats);
     PRINT_STATS(&stats, Selection Sort);
     EXPECT_TRUE(std::equal(std::begin(sorted_int_arr), std::end(sorted_int_arr), shuffled_int_arr));
@@ -53,7 +53,7 @@ TEST(generic_selection_sort_test, IntVectorTest) {
     RECORD_ARR_LEN(&stats, shuffled.size());
     RECORD_ELEMENT_SIZE(&stats, sizeof(int));
     START_TIMMING(&stats);
-    generic_selection_sort(shuffled_data, sizeof(int), shuffled.size(), compare_integers, integers_swap);
+    generic_selection_sort(shuffled_data, sizeof(int), shuffled.size(), compare_integers, swap_integers);
     STOP_TIMMING(&stats);
     PRINT_STATS(&stats, Selection Sort);
     EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_data));
@@ -74,7 +74,7 @@ TEST(generic_selection_sort_test, NativeLongArrayTest) {
     START_TIMMING(&stats);
     RECORD_ARR_LEN(&stats, shuffled.size());
     RECORD_ELEMENT_SIZE(&stats, sizeof(long));
-    generic_selection_sort(shuffled_int_arr, sizeof(long), TEST_DATA_SIZE, compare_integers, integers_swap);
+    generic_selection_sort(shuffled_int_arr, sizeof(long), TEST_DATA_SIZE, compare_integers, swap_integers);
     STOP_TIMMING(&stats);
     PRINT_STATS(&stats, Selection Sort);
     EXPECT_TRUE(std::equal(std::begin(sorted_int_arr), std::end(sorted_int_arr), shuffled_int_arr));
@@ -94,7 +94,7 @@ TEST(generic_selection_sort_test, IntLongTest) {
     RECORD_ARR_LEN(&stats, shuffled.size());
     RECORD_ELEMENT_SIZE(&stats, sizeof(long));
     START_TIMMING(&stats);
-    generic_selection_sort(shuffled_data, sizeof(long), shuffled.size(), compare_integers, integers_swap);
+    generic_selection_sort(shuffled_data, sizeof(long), shuffled.size(), compare_integers, swap_integers);
     STOP_TIMMING(&stats);
     PRINT_STATS(&stats, Selection Sort);
     EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_data));

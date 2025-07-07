@@ -13,7 +13,7 @@ int compare_strings(const void *const a, const void *const b)
   return strcmp((const char *)a, (const char *)b);
 }
 
-void integers_swap(void *const a, void *const b)
+void swap_integers(void *const a, void *const b)
 {
   GENERIC_SAMP_SIZE_SWAP(sizeof(int), a, b);
 }
