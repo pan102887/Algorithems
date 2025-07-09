@@ -16,8 +16,7 @@ extern "C" {
         void* arr,
         size_t element_size,
         size_t len,
-        compare_func_t cmp,
-        swap_func_t swap_fun
+        compare_func_t cmp
     );
 
 #ifdef __cplusplus

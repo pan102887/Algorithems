@@ -1,0 +1,7 @@
+#ifndef TEST_CONFIG_H
+#define TEST_CONFIG_H
+
+#define TEST_DATA_SIZE 1000000
+#define BENCHMARK_TEST_DATA_SIZE 1000000
+
+#endif

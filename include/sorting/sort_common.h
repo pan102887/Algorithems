@@ -41,7 +41,8 @@ extern "C"
 
   extern void print_stats(const sort_stats_t *stats);
 
-
+#define INDEX_OF(start_ptr, element_size, index) \
+  ((void *)((char *)(start_ptr) + ((index) * (element_size))))
 
 #define START_TIMMING(stats)        \
   do                                \
@@ -164,8 +165,6 @@ extern "C"
            (stats)->max_mamory_used);             \
   } while (0)
 
-
-
 #ifndef START_TIMMING
 #define START_TIMMING(stats)
 #endif
@@ -206,20 +205,34 @@ extern "C"
 #define PRINT_STATS(stats, sort_type)
 #endif
 
-
-
-#define GENERIC_SAMP_SIZE_SWAP(size, ap, bp)                     \
-  do                                                             \
-  {                                                              \
-    if ((size) <= 0)                                             \
-      break;                                                     \
-    size_t __SIZE = (size);                                      \
-    for (size_t i = 0; i < __SIZE; i++)                          \
-    {                                                            \
-      ((char *)(ap))[i] = ((char *)(ap))[i] ^ ((char *)(bp))[i]; \
-      ((char *)(bp))[i] = ((char *)(ap))[i] ^ ((char *)(bp))[i]; \
-      ((char *)(ap))[i] = ((char *)(ap))[i] ^ ((char *)(bp))[i]; \
-    }                                                            \
+  
+// todo: 使用汇编实现高性能swap
+#define GENERIC_SAMP_SIZE_SWAP(size, ap, bp)    \
+  do                                            \
+  {                                             \
+    if ((size) <= 0 || (ap) == (bp))            \
+      break;                                    \
+    size_t __SIZE = (size);                     \
+    char *__A = (char *)(ap);                   \
+    char *__B = (char *)(bp);                   \
+                                                \
+    /* 对于小size使用栈缓冲区，大size使用XOR */ \
+    if (__SIZE <= 64)                           \
+    {                                           \
+      char __temp[64];                          \
+      memcpy(__temp, __A, __SIZE);              \
+      memcpy(__A, __B, __SIZE);                 \
+      memcpy(__B, __temp, __SIZE);              \
+    }                                           \
+    else                                        \
+    {                                           \
+      for (size_t __i = 0; __i < __SIZE; __i++) \
+      {                                         \
+        __A[__i] ^= __B[__i];                   \
+        __B[__i] ^= __A[__i];                   \
+        __A[__i] ^= __B[__i];                   \
+      }                                         \
+    }                                           \
   } while (0)
 
   /**

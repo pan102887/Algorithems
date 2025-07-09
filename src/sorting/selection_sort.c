@@ -34,8 +34,7 @@ sort_result_t generic_selection_sort(
     void* arr,
     size_t element_size,
     size_t len,
-    compare_func_t cmp,
-    swap_func_t swap_fun
+    compare_func_t cmp
 ) {
     if (NULL == arr || NULL == cmp) {
         return SORT_ERROR_NULL_POINTER;
@@ -47,12 +46,12 @@ sort_result_t generic_selection_sort(
     for (size_t i = 0; i < len - 1; i++) {
         size_t min_index = i;
         for (size_t j = i + 1; j < len; j++) {
-            if (cmp((char*)arr + j * element_size, (char*)arr + min_index * element_size) < 0) {
+            if (cmp(INDEX_OF(arr, element_size, j), INDEX_OF(arr, element_size, min_index)) < 0) {
                 min_index = j;
             }
         }
         if (min_index != i) {
-            swap_fun((char*)arr + i * element_size, (char*)arr + min_index * element_size);
+            GENERIC_SAMP_SIZE_SWAP(element_size,INDEX_OF(arr, element_size, i), INDEX_OF(arr, element_size, min_index));
         }
     }
     return SORT_SUCCESS;

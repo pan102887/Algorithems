@@ -2,8 +2,7 @@
 #include <stdio.h>
 #include "sorting/merge_sort.h"
 
-#define INDEX_OF(start_ptr, element_size, index) \
-    ((char *)(start_ptr) + ((index) * (element_size)))
+
 
 static inline sort_result_t internal_merge_sort(
     void *arr,
@@ -122,5 +121,3 @@ static inline sort_result_t merge(
     free(right_arr);
     return SORT_SUCCESS;
 }
-
-#undef INDEX_OF

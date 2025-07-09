@@ -15,8 +15,8 @@
 #include "sorting/insertion_sort.h"
 #include "sorting/sort_common.h"
 #include "util/test_data_util.h"
+#include "test_config.h" // 包含测试配置文件
 
-#define TEST_DATA_SIZE 10000
 
 class InsertionSortTest : public ::testing::Test, public TestDataUtil
 {
@@ -65,39 +65,25 @@ TEST_F(InsertionSortTest, SingleElementArray)
 {
     std::vector<int> single_element = {42};
     std::vector<void *> ptr_array = {&single_element[0]};
-    sort_stats_t stats;
 
-    RECORD_ARR_LEN(&stats, single_element.size());
-    RECORD_ELEMENT_SIZE(&stats, sizeof(int));
-    START_TIMMING(&stats);
     sort_result_t result = generic_insertion_sort(ptr_array.data(),
                                                   ptr_array.size(),
                                                   sizeof(int),
                                                   compare_integers);
-    STOP_TIMMING(&stats);
-    PRINT_STATS(&stats, Insertion Sort);
     EXPECT_EQ(result, SORT_SUCCESS);
 }
 
 TEST_F(InsertionSortTest, BinaryInsertionSort)
 {
-    sort_stats_t stats;
     auto shuffled_vector = get_shuffled_int_vector();
     std::vector<void *> ptr_vector;
     for (auto &elem : shuffled_vector) ptr_vector.push_back(static_cast<void *>(&elem));
-    RECORD_ARR_LEN(&stats, shuffled_vector.size());
-    RECORD_ELEMENT_SIZE(&stats, sizeof(int));
-    START_TIMMING(&stats);
     sort_result_t result = generic_insertion_sort_with_binary_search(ptr_vector.data(),
                                                                      ptr_vector.size(),
                                                                      sizeof(int),
                                                                      compare_integers);
-    STOP_TIMMING(&stats);
-    PRINT_STATS(&stats, Insertion Sort);
     EXPECT_EQ(result, SORT_SUCCESS);
 
     // 检查通过指针排序后的结果是否正确
     EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_vector.begin()));
 }
-
-#undef TEST_DATA_SIZE
