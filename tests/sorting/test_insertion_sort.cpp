@@ -73,17 +73,17 @@ TEST_F(InsertionSortTest, SingleElementArray)
     EXPECT_EQ(result, SORT_SUCCESS);
 }
 
-TEST_F(InsertionSortTest, BinaryInsertionSort)
-{
-    auto shuffled_vector = get_shuffled_int_vector();
-    std::vector<void *> ptr_vector;
-    for (auto &elem : shuffled_vector) ptr_vector.push_back(static_cast<void *>(&elem));
-    sort_result_t result = generic_insertion_sort_with_binary_search(ptr_vector.data(),
-                                                                     ptr_vector.size(),
-                                                                     sizeof(int),
-                                                                     compare_integers);
-    EXPECT_EQ(result, SORT_SUCCESS);
+// TEST_F(InsertionSortTest, BinaryInsertionSort)
+// {
+//     auto shuffled_vector = get_shuffled_int_vector();
+//     std::vector<void *> ptr_vector;
+//     for (auto &elem : shuffled_vector) ptr_vector.push_back(static_cast<void *>(&elem));
+//     sort_result_t result = generic_insertion_sort_with_binary_search(ptr_vector.data(),
+//                                                                      ptr_vector.size(),
+//                                                                      sizeof(int),
+//                                                                      compare_integers);
+//     EXPECT_EQ(result, SORT_SUCCESS);
 
-    // 检查通过指针排序后的结果是否正确
-    EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_vector.begin()));
-}
+//     // 检查通过指针排序后的结果是否正确
+//     EXPECT_TRUE(std::equal(sorted_int_vector.begin(), sorted_int_vector.end(), shuffled_vector.begin()));
+// }

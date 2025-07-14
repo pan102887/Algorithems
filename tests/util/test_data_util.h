@@ -29,6 +29,14 @@ public:
         
         return shuffled;
     }
+
+    // 新增的指针版本
+    static std::vector<T> shuffle_array(T* arr, size_t size) {
+        std::vector<T> result(arr, arr + size);
+        auto rng = std::default_random_engine{};
+        std::shuffle(result.begin(), result.end(), rng);
+        return result;
+    }
 };
 
 class TestDataUtil {
